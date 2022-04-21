@@ -1,14 +1,11 @@
 import requests
-import os
 
 
-def get_vacancies_superjob(text):
+def get_vacancies_superjob(text, **params):
     """Получить вакансии Superjob по запросу"""
-    key = os.environ['SUPERJOB_KEY']
-
     url = 'https://api.superjob.ru/2.0/vacancies'
     headers = {
-        'X-Api-App-Id': key,
+        'X-Api-App-Id': params['key'],
     }
     params = {
         'town': 4,

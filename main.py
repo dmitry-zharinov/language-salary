@@ -1,13 +1,17 @@
 from dotenv import load_dotenv
+import os
 
 from fetch_hh import get_vacancies_hh, predict_rub_salary_for_hh
 from fetch_superjob import get_vacancies_superjob, \
                         predict_rub_salary_for_superjob
 
 
-def fetch_language_info(language, get_vacancies_func, predict_rub_salary_func):
+def fetch_language_info(language,
+                        get_vacancies_func,
+                        predict_rub_salary_func,
+                        **params):
     """Получить среднюю зарплату по вакансиям по языку"""
-    vacancies, vacancies_found = get_vacancies_func(language)
+    vacancies, vacancies_found = get_vacancies_func(language, **params)
     salaries = list(
         filter(
             None,
@@ -25,6 +29,7 @@ def fetch_language_info(language, get_vacancies_func, predict_rub_salary_func):
 
 def main():
     load_dotenv()
+    key = os.environ['SUPERJOB_KEY']
 
     '''
     vacancies, vacancies_found = get_vacancies_superjob('Python', superjob_key)
@@ -45,7 +50,8 @@ def main():
         language: fetch_language_info(
             language,
             get_vacancies_superjob,
-            predict_rub_salary_for_superjob)
+            predict_rub_salary_for_superjob,
+            key=key)
         for language in languages
     }
     print(languages_found_hh)
