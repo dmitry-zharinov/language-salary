@@ -3,5 +3,16 @@
         "Python",
         "Java",
         "Javascript",
-        "ABAP"]
+        "ABAP",
+        "C#",
+        "Objective-C",
+        "Ruby",
+        "Typescript",
+        "Scala",
+        "Go",
+        "Swift",
+        "C++",
+        "PHP",
+        "C"
+    ]
 }
