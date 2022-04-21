@@ -1,41 +1,24 @@
-import requests
-import pprint
+import os
 
-def get_vacancies(text):
-    url = 'https://api.hh.ru/vacancies'
-    params = {
-        'area': 1,
-        'text': text
-    }
-    response = requests.get(url, params)
-    response.raise_for_status()
-    return response.json()
+from dotenv import load_dotenv
 
-
-def predict_rub_salary(vacancy):
-    try:
-        salary = vacancy['salary']
-        if salary['currency'] == 'RUR':
-            if salary['from'] is None:
-                predicted_salary = salary['to'] * 0.8
-            elif salary['to'] is None:
-                predicted_salary = salary['from'] * 1.2
-            else:
-                predicted_salary = (salary['to'] + salary['from']) / 2
-        else:
-            return None
-    except TypeError:
-        return None
-    return predicted_salary
+from fetch_hh import get_vacancies_hh, predict_rub_salary_for_hh
+from fetch_superjob import get_vacancies_superjob
 
 
 def fetch_language_info(language):
-    vacancies = get_vacancies(language)
-    salaries_subq = [predict_rub_salary(v) for v in vacancies['items']]
-    salaries = list(filter(None, salaries_subq))
+    """Получить среднюю зарплату по вакансиям по языку"""
+    vacancies, vacancies_found = get_vacancies_hh(language)
+    # salaries = [predict_rub_salary_for_hh(v) for v in vacancies]
+    salaries = list(
+        filter(
+            None,
+            [predict_rub_salary_for_hh(v) for v in vacancies]
+        )
+    )
     if len(salaries) > 0:
         language_info = {
-            'vacancies_found': vacancies['found'],
+            'vacancies_found': vacancies_found,
             'vacancies_processed': len(salaries),
             'average_salary': int(sum(salaries) / len(salaries))
         }
@@ -43,14 +26,17 @@ def fetch_language_info(language):
 
 
 def main():
+    load_dotenv()
+    superjob_key = os.environ['SUPERJOB_KEY']
+    get_vacancies_superjob('Python', superjob_key)
+    '''
     languages = ['Python', 'Java', 'Javascript', 'ABAP']
     languages_found = {
         language: fetch_language_info(language)
         for language in languages
     }
-    pprint(languages_found)
-    # for vacancy in get_vacancies('Python')['items']:
-    #    print(predict_rub_salary(vacancy))
+    print(languages_found)
+    '''
 
 
 if __name__ == '__main__':
