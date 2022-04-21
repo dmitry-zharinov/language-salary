@@ -9,8 +9,6 @@ def get_vacancies_hh(text):
         'text': text,
         'only_with_salary': True,
     }
-    # response = requests.get(url, params)
-    # response.raise_for_status()
     vacancies = []
     page = 0
     pages_number = 1
