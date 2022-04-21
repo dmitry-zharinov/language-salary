@@ -1,4 +1,5 @@
 import os
+import json
 
 from dotenv import load_dotenv
 from terminaltables import SingleTable
@@ -54,8 +55,10 @@ def get_data_as_table(language_salary, title):
 def main():
     load_dotenv()
     key = os.environ['SUPERJOB_KEY']
+    with open('config.json') as config_file:
+        config = json.load(config_file)
 
-    languages = ['Python', 'Java', 'Javascript', 'ABAP']
+    languages = config['languages']
     language_salary_hh = {
         language: fetch_language_info(
             language,
