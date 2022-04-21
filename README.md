@@ -28,3 +28,7 @@ $ python main.py
 
 Доступные параметры:
 - `languages` - список языков программирования, по которым будет собрана статистика
+
+### Пример
+![example](https://user-images.githubusercontent.com/16899464/164475906-c8da9c52-0444-4604-915c-6c986a662f1b.png)
+
