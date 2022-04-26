@@ -4,28 +4,50 @@ import json
 from dotenv import load_dotenv
 from terminaltables import SingleTable
 
-from fetch_hh import get_vacancies_hh, predict_rub_salary_for_hh
-from fetch_superjob import (get_vacancies_superjob,
-                            predict_rub_salary_for_superjob)
+from fetch_hh import get_vacancies_hh
+from fetch_superjob import get_vacancies_superjob
+
+
+def predict_salary(salary_from, salary_to):
+    """Получить ожидаемую зарплату"""
+    if salary_from and salary_to:
+        return (salary_from + salary_to) / 2
+    elif salary_from:
+        return salary_from * 1.2
+    elif salary_to:
+        return salary_to * 0.8
+    else:
+        return None
 
 
 def fetch_language_info(language,
                         get_vacancies_func,
-                        predict_rub_salary_func,
                         **params):
     """Получить среднюю зарплату по вакансиям по языку"""
     vacancies, vacancies_found = get_vacancies_func(language, **params)
-    salaries = list(
-        filter(
-            None,
-            [predict_rub_salary_func(v) for v in vacancies]
-        )
-    )
-    if len(salaries) > 0:
+    salaries = []
+    for vacancy in vacancies:
+        if vacancy.get('currency') == 'rub':
+            salaries.append(
+                predict_salary(
+                    vacancy['payment_from'],
+                    vacancy['payment_to']
+                )
+            )
+        elif vacancy['salary'].get('currency') == 'RUR':
+            salaries.append(
+                predict_salary(
+                    vacancy['salary']['from'],
+                    vacancy['salary']['to']
+                )
+            )
+    result_salaries = list(filter(None, salaries))
+    salaries_found = len(result_salaries)
+    if salaries_found > 0:
         language_info = {
             'vacancies_found': vacancies_found,
-            'vacancies_processed': len(salaries),
-            'average_salary': int(sum(salaries) / len(salaries))
+            'vacancies_processed': salaries_found,
+            'average_salary': int(sum(result_salaries) / salaries_found)
         }
         return language_info
 
@@ -62,15 +84,13 @@ def main():
     language_salary_hh = {
         language: fetch_language_info(
             language,
-            get_vacancies_hh,
-            predict_rub_salary_for_hh)
+            get_vacancies_hh)
         for language in languages
     }
     language_salary_superjob = {
         language: fetch_language_info(
             language,
             get_vacancies_superjob,
-            predict_rub_salary_for_superjob,
             key=key)
         for language in languages
     }
